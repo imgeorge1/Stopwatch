@@ -1,41 +1,42 @@
-
 const start = document.getElementById("start");
 const stop  = document.getElementById("stop");
 const restart  = document.getElementById("restart");
 
 let timeArea = document.getElementById("time-area");
 
-let countedSecs = 0;
-
 let running = false;
-let intervalId;
-let isIntervalRunning = false;
+let startTime = null;
+let intervalId = null;
+let elapsedBefore = 0; 
 
-
-start.addEventListener("click", ()=>{
+start.addEventListener("click", () => {
+  if (running) return; 
   running = true;
 
-  if(!isIntervalRunning){
-    intervalId = setInterval(() => {
-      if(running){ 
-        countedSecs += 1;
-        timeArea.innerHTML = countedSecs
-      }
-    }, 1000)
-    isIntervalRunning = true;
-  }
-})
+  startTime = Date.now() - elapsedBefore; 
+  intervalId = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    elapsedBefore = elapsed;
 
-stop.addEventListener("click", () => {
-  running = false;
-  clearInterval(intervalId);
-  isIntervalRunning = false;
+    let milliseconds = elapsed % 1000;
+    let totalSeconds = Math.floor(elapsed / 1000);
+    let seconds = totalSeconds % 60;
+    let minutes = Math.floor(totalSeconds / 60);
+
+    timeArea.innerHTML = `${minutes}:${seconds}:${milliseconds}`;
+  }, 10);
 });
 
-
-restart.addEventListener("click", ()=>{
-  countedSecs = 0;
-  timeArea.innerHTML = 0;
+stop.addEventListener("click", () => {
+  if (!running) return;
   running = false;
-  
-})
+  clearInterval(intervalId);
+});
+
+restart.addEventListener("click", () => {
+  running = false;
+  clearInterval(intervalId);
+  elapsedBefore = 0;
+
+  timeArea.innerHTML = "0:0:0";
+});
